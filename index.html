@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Make AI Work In Your Sleep — Build Guide</title>
+<meta name="description" content="Build an AI job-search agent and a resume tailor that run from your own Google Drive. Claude or ChatGPT.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script>
+document.documentElement.className+=' js';
+</script>
+<style>
+:root{
+  --bg:oklch(0.12 0.035 295);--g1:oklch(0.1 0.03 290);--g2:oklch(0.15 0.06 300);--g3:oklch(0.11 0.04 280);--moon-o:.08;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 12px 30px -10px rgba(0,0,0,.7);--shadow-lift:0 2px 4px rgba(0,0,0,.4),0 20px 40px -12px rgba(0,0,0,.75);
+  --panel:oklch(0.19 0.025 295);--ink:#efede8;--ink2:#b9b4c2;--line:oklch(0.3 0.03 295);
+  --code-bg:oklch(0.23 0.02 295);--code-line:oklch(0.34 0.03 295);--code-ink:#ecebe7;--fill:#5a4a0a;--fill-ink:#ffe9a0;
+  --orange:oklch(0.74 0.15 55);--blue:oklch(0.72 0.14 262);--green:oklch(0.74 0.13 155);--red:oklch(0.7 0.17 27);--purple:oklch(0.72 0.14 300);
+  --orange-t:oklch(0.22 0.04 55);--blue-t:oklch(0.21 0.04 262);--green-t:oklch(0.21 0.04 155);--red-t:oklch(0.22 0.05 27);
+  --chip-same-bg:oklch(0.3 0.02 295);--chip-same-ink:#e2e3e8;
+  --head:"Bricolage Grotesque",system-ui,sans-serif;--body:"Atkinson Hyperlegible",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;overflow-x:hidden;position:relative}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath fill='white' d='M41.26 34.13A12 12 0 1 1 27.63 18.24A11 11 0 0 0 41.26 34.13ZM101.26 94.13A12 12 0 1 1 87.63 78.24A11 11 0 0 0 101.26 94.13Z'/%3E%3C/svg%3E"),linear-gradient(150deg,var(--g1),var(--g2) 55%,var(--g3));background-size:120px 120px,100% 100%}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(150deg,var(--g1),var(--g2) 55%,var(--g3));opacity:calc(1 - var(--moon-o))}
+.card,.file,.get,.needs li,.flow div,.made li,.check,.prompt,.gate,.bar{box-shadow:var(--shadow)}
+.check{border-style:solid!important;border-color:var(--line)!important}
+/* motion (ported from the Shipd page) */
+.js .rv{opacity:0;transform:translateY(26px);transition:opacity .75s cubic-bezier(.16,.8,.24,1),transform .75s cubic-bezier(.16,.8,.24,1)}
+.js .rv.in{opacity:1;transform:translateY(0)}
+.js .stg>*{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+.js .stg.in>*{opacity:1;transform:translateY(0)}
+.stg.in>*:nth-child(1){transition-delay:.02s}.stg.in>*:nth-child(2){transition-delay:.10s}.stg.in>*:nth-child(3){transition-delay:.18s}.stg.in>*:nth-child(4){transition-delay:.26s}.stg.in>*:nth-child(5){transition-delay:.34s}
+.pixel-text .pc{display:inline-block;white-space:pre;opacity:0;transform:translateY(11px) scale(.82);filter:blur(2.5px);transition:opacity .32s steps(4,end),transform .32s steps(4,end),filter .32s steps(4,end)}
+.pixel-text.in .pc{opacity:1;transform:none;filter:blur(0)}
+.cta{position:relative;isolation:isolate;overflow:hidden;transition:color .18s ease,box-shadow .18s ease}
+.cta::before{content:"";position:absolute;inset:0;background:#fff;transform:scaleX(0);transform-origin:left center;transition:transform .2s cubic-bezier(.65,0,.35,1);z-index:-1}
+.cta:hover,.cta:focus-visible{color:#151513;box-shadow:0 0 0 5px color-mix(in oklab,var(--orange) 30%,transparent)}
+.cta:hover::before{transform:scaleX(1)}
+.cta:active,.copy:active,.theme:active,.nav a:active{transform:translateY(1px)}
+.cta .ico{transition:transform .15s ease}
+.cta:hover .ico{transform:translateY(3px)}
+.copy,.theme{transition:transform .15s ease,box-shadow .18s ease,background .18s,color .18s,border-color .18s}
+.copy,.theme,.tpl-btn{position:relative;isolation:isolate;overflow:hidden;--bc:var(--bc0,#fff)}
+.copy::before,.theme::before,.tpl-btn::before{content:"";position:absolute;inset:0;background:var(--bc);transform:scaleX(0);transform-origin:left center;transition:transform .2s cubic-bezier(.65,0,.35,1);z-index:-1}
+.copy:hover,.theme:hover,.tpl-btn:hover{color:#151513;border-color:var(--bc);transform:translateY(-1px);box-shadow:0 0 0 5px color-mix(in oklab,var(--bc) 25%,transparent)}
+.copy:hover::before,.theme:hover::before,.tpl-btn:hover::before{transform:scaleX(1)}
+.theme{--bc0:#0a66c2}.theme:hover{color:#fff}
+.theme::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(105deg,transparent 35%,rgba(10,102,194,.6) 50%,transparent 65%);transform:translateX(-120%);animation:copySheen 4.2s ease-in-out infinite;pointer-events:none}.theme:hover::after{animation:none;opacity:0}
+.copy{--bc0:var(--c,var(--orange));border-color:var(--bc0)!important}
+.copy::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(105deg,transparent 35%,color-mix(in oklab,var(--bc0) 45%,transparent) 50%,transparent 65%);transform:translateX(-120%);animation:copySheen 4.2s ease-in-out infinite;pointer-events:none}
+.copy:hover,.copy:focus-visible,.copy.ok{animation:none}.copy:hover::after,.copy.ok::after{animation:none;opacity:0}
+.prompt .copy{background:color-mix(in oklab,var(--bc0) 14%,var(--panel))}
+@keyframes copySheen{0%,55%{transform:translateX(-120%)}85%,100%{transform:translateX(120%)}}
+.copy.ok,.copy.ok:hover{color:#151513;background:var(--green)!important;border-color:var(--green)!important;box-shadow:0 0 0 5px color-mix(in oklab,var(--green) 25%,transparent)}
+.nav a{transition:color .15s ease,background .15s ease}
+.nav a:hover{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.copy::after,.theme::after{animation:none!important}.js .rv,.js .stg>*,.pixel-text .pc{opacity:1!important;transform:none!important;filter:none!important;transition:none!important}html{scroll-behavior:auto}}
+a{color:var(--blue)}a:hover{color:var(--ink)}
+b,strong{font-weight:700}
+h1,h2,h3{font-family:var(--head);margin:0;line-height:1.15;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
+ul{margin:0;padding-left:1.2em}
+li{margin:.25em 0}
+.ico{width:1.25em;height:1.25em;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wrap{max-width:780px;margin:0 auto;padding:0 18px}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:20;background:color-mix(in oklab,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar .wrap{display:flex;align-items:center;gap:8px;height:60px}
+.brand{font-family:var(--head);font-weight:800;font-size:16px;white-space:nowrap;margin-right:auto;color:var(--ink);text-decoration:none}
+.nav{display:flex;gap:4px;min-width:0}
+.nav a{display:flex;align-items:center;gap:6px;min-height:44px;padding:0 10px;border-radius:10px;color:var(--ink2);text-decoration:none;font-weight:700;font-size:14px;white-space:nowrap}
+.nav a i{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none}
+.nav a[aria-current=true]{background:var(--panel);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--c)}
+.theme{min-width:44px;min-height:44px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;display:grid;place-items:center;cursor:pointer;text-decoration:none;font:800 17px/1 var(--body);letter-spacing:-.02em}
+.theme:hover{color:var(--ink)}
+.prog{height:3px;background:transparent}
+.prog span{display:block;height:100%;width:0;background:var(--c,var(--orange));transition:background .3s}
+@media (max-width:620px){
+  .brand{display:none}
+  .topbar .wrap{padding:0 8px;gap:4px;height:54px}
+  .nav{flex:1;justify-content:space-between}
+  .nav a{padding:0 8px;font-size:13px;gap:5px}
+}
+@media (max-width:360px){.nav a i{display:none}}
+
+/* hero */
+.hero{padding:56px 0 40px;text-align:left}
+.kicker{font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+.hero h1{font-size:clamp(40px,9vw,68px);font-weight:800;letter-spacing:-.02em;margin:10px 0 14px}
+.hero .lede{font-size:clamp(18px,2.6vw,21px);color:var(--ink2);max-width:36em}
+.gets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:28px 0}
+.get{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;font-weight:700;line-height:1.3}
+.get .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--t);color:var(--c)}
+.get .ic .ico{width:24px;height:24px}
+@media (max-width:620px){.gets{grid-template-columns:1fr}.get{flex-direction:row;align-items:center}}
+.cta{display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:0 22px;border-radius:12px;background:var(--orange);color:#fff;font-weight:700;font-size:18px;text-decoration:none}
+
+
+/* blocks */
+.block{margin:28px 0}
+.block h3,.h3{font-size:20px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0 10px}
+.flow div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:15px;line-height:1.4;color:var(--ink2)}
+.flow b{display:block;color:var(--ink);font-family:var(--head);font-size:17px;margin-bottom:2px}
+@media (max-width:620px){.flow{grid-template-columns:1fr 1fr}}
+.note{font-size:15px;color:var(--ink2);display:flex;gap:8px;align-items:flex-start}
+.note .ico{margin-top:2px}
+.needs{list-style:none;padding:0;display:grid;gap:8px}
+.needs li{margin:0;display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.needs li .ico{color:var(--ink2);margin-top:3px}
+
+/* gates */
+.gate{border-radius:14px;padding:18px;border:2px solid var(--c);background:var(--t);margin:24px 0}
+.gate .gt{display:flex;gap:10px;align-items:flex-start;font-family:var(--head);font-weight:800;font-size:20px;line-height:1.2;margin-bottom:8px;color:var(--ink)}
+.gate .gt .ico{color:var(--c);width:26px;height:26px}
+.gate ul{margin-top:8px}
+.gi{display:inline-block;object-fit:contain;width:1.05em;height:1.05em;vertical-align:-.18em;margin-right:4px}
+.shot{margin:12px 0 4px}.shot img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line)}.shot figcaption{font-size:13px;opacity:.75;margin-top:6px}
+.gate.red{--c:var(--red);--t:var(--red-t)}
+.gate.blue{--c:var(--blue);--t:var(--blue-t)}
+.gate.green{--c:var(--green);--t:var(--green-t)}
+
+/* parts */
+.part{padding:40px 0 8px;scroll-margin-top:60px}
+.part-head{display:flex;gap:14px;align-items:center;padding-bottom:16px;border-bottom:3px solid var(--c);margin-bottom:8px}
+.part-head .badge{width:52px;height:52px;border-radius:14px;background:var(--c);color:#fff;display:grid;place-items:center;flex:none}
+.part-head .badge{color:#151513}
+.part-head .badge .ico{width:28px;height:28px}
+.eyebrow{font-weight:700;font-size:13px;letter-spacing:.14em;color:var(--c)}
+.part-head h2{font-size:clamp(26px,5vw,34px);font-weight:800;letter-spacing:-.01em}
+.sub{color:var(--ink2);font-size:15px;margin-top:4px}
+.setup{--c:var(--orange);--t:var(--orange-t)}
+.p1{--c:var(--blue);--t:var(--blue-t)}
+.p2{--c:var(--green);--t:var(--green-t)}
+.wk{--c:var(--green);--t:var(--green-t)}
+
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:30px 0 12px;padding:10px 14px;border-radius:10px;background:var(--t);color:var(--ink);font-family:var(--head);font-weight:800;font-size:18px}
+.bar .time{display:flex;align-items:center;gap:6px;font-family:var(--body);font-weight:400;font-size:14px;color:var(--ink2);text-align:right}
+.bar .time .ico{width:16px;height:16px}
+
+.step{margin:18px 0 26px}
+.sh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.sh h3{font-size:20px;font-weight:700}
+.num{font-family:var(--body);font-size:30px;line-height:1;color:var(--c)}
+.chip{font-family:var(--body);font-size:12px;font-weight:700;letter-spacing:.08em;padding:4px 9px;border-radius:6px;white-space:nowrap;line-height:1.3}
+.chip.new{background:var(--blue);color:#fff}
+.chip.same{background:var(--chip-same-bg);color:var(--chip-same-ink);box-shadow:inset 0 0 0 1px var(--code-line)}
+.chip.set{background:var(--purple);color:#fff}
+.chip.you{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.chip.new,.chip.set{color:#151513}
+.where{font-size:15px;color:var(--ink2);margin-bottom:10px}
+.step>p{margin-bottom:10px}
+
+/* prompts */
+.prompt{border:1px solid var(--code-line);border-left:5px solid var(--c,#8a90a6);border-radius:12px;background:var(--code-bg);overflow:hidden}
+.ph{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 6px 6px 14px;border-bottom:1px solid var(--code-line);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+.copy{min-height:44px;min-width:104px;padding:0 16px;border-radius:9px;border:1.5px solid var(--ink);background:var(--panel);color:var(--ink);font:700 15px var(--body);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+
+
+pre{margin:0;padding:14px;font-family:var(--mono);font-size:14px;line-height:1.55;color:var(--code-ink);white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal}
+.fill{background:var(--fill);color:var(--fill-ink);border-radius:3px;padding:0 2px;font-weight:600}
+code.sample{font-family:var(--mono);font-size:13px;background:var(--code-bg);border:1px solid var(--code-line);border-radius:6px;padding:3px 8px;white-space:nowrap}
+
+/* checks */
+.check{margin-top:12px;border:1.5px dashed var(--code-line);border-radius:12px;padding:12px 14px;background:var(--panel)}
+.check .ct{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:4px;flex-wrap:wrap}
+.check .ct .ico{color:var(--green)}
+.cl{list-style:none;padding:0;margin:0}
+.cl li{margin:0}
+.cl label{display:flex;align-items:center;gap:12px;min-height:44px;cursor:pointer;padding:4px 0}
+.cl input{appearance:none;-webkit-appearance:none;width:24px;height:24px;flex:none;border:2px solid var(--ink2);border-radius:6px;margin:0;display:grid;place-items:center;background:var(--panel);cursor:pointer}
+.cl input:checked{background:var(--green);border-color:var(--green)}
+.cl input:checked::after{content:"";width:6px;height:12px;border:solid #fff;border-width:0 3px 3px 0;transform:translateY(-2px) rotate(45deg)}
+.cl input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.cl input:checked+span{color:var(--ink2);text-decoration:line-through;text-decoration-color:var(--line)}
+.check .after{font-size:15px;color:var(--ink2);margin-top:4px}
+
+/* Drive setup */
+.files{display:grid;gap:10px}
+.file{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.file .fh{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.file .fh label{display:flex;align-items:center;gap:12px;min-height:44px;cursor:pointer;font-weight:700;font-size:18px}
+.type{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--orange);border:1.5px solid var(--orange);border-radius:6px;padding:2px 7px}
+.file p{color:var(--ink2);font-size:16px;margin-left:36px}
+.styles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.styles .file p{margin-left:0;margin-top:6px}
+.file.tpl{display:flex;flex-direction:column}
+.tpl-prev{margin:-2px -2px 10px;aspect-ratio:4/3;overflow:hidden;border-radius:8px;background:#fff}.tpl-prev img{display:block;width:100%;height:auto}
+.tpl-btn{margin-top:12px;align-self:flex-start;display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:9px;border:1.5px solid var(--bc0);color:var(--ink);font-weight:700;font-size:15px;text-decoration:none;transition:transform .15s ease,box-shadow .18s ease,background .18s}
+
+.tpl-btn:active{transform:translateY(1px)}
+@media print{.tpl-btn{display:none}}
+.styles .file b.n{font-family:var(--head);font-size:18px}
+.styles .how{font-size:15px;color:var(--ink);margin-top:8px!important;border-top:1px solid var(--line);padding-top:8px}
+@media (max-width:620px){.styles{grid-template-columns:1fr}}
+.made{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.made li{margin:0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.made b{font-size:16px}
+.gdoc{width:20px;height:20px;flex:none;vertical-align:middle}.made b.gd{display:flex;align-items:center;gap:8px}.type .gdoc{width:14px;height:14px;margin:-2px 5px 0 0}
+.made .by{font-size:13px;font-weight:700;color:var(--ink2);white-space:nowrap}
+.made span.w{grid-column:1/-1;color:var(--ink2);font-size:15px}
+.legend{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px 14px;align-items:start}
+.legend>:nth-child(odd){justify-self:start;margin-top:2px}
+@media (max-width:520px){.legend{grid-template-columns:1fr;gap:4px}.legend>:nth-child(even){margin-bottom:12px}}
+.week{list-style:none;padding:0;margin:0}
+footer{padding:40px 0 60px;color:var(--ink2);font-size:14px}
+
+/* print: US Letter portrait */
+@media print{
+  @page{size:letter portrait;margin:0.45in 0.5in 0.5in}
+  :root{--bg:#fff;--panel:#fff;--ink:#1d1c1a;--ink2:#4c4944;--line:#d5d2cc;--code-bg:#eeeef1;--code-line:#bfc1ca;--code-ink:#1d1c1a;--fill:#fff0b3;--fill-ink:#4a3b00;
+    --orange:oklch(0.62 0.16 52);--blue:oklch(0.53 0.17 262);--green:oklch(0.52 0.13 155);--red:oklch(0.55 0.19 27);--purple:oklch(0.5 0.17 300);
+    --orange-t:oklch(0.96 0.03 60);--blue-t:oklch(0.96 0.025 262);--green-t:oklch(0.96 0.03 155);--red-t:oklch(0.96 0.03 27);--chip-same-bg:#e4e5ea;--chip-same-ink:#33343a}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;box-shadow:none!important;animation:none!important}
+  body::before,body::after{display:none}
+  .js .rv,.js .stg>*,.pixel-text .pc{opacity:1!important;transform:none!important;filter:none!important}
+  main>section,.pin{transform:none!important;opacity:1!important}
+  .part-head .badge,.chip.new,.chip.set{color:#fff!important}
+  body{font-size:9.6pt;line-height:1.38;background:#fff}
+  .topbar,.copy,.cta,.theme,footer{display:none!important}
+  .wrap{max-width:none;padding:0}
+  .hero{padding:0 0 4pt}
+  .kicker{font-size:7.5pt}
+  .hero h1{font-size:26pt;margin:2pt 0 4pt}
+  .hero .lede{font-size:10.5pt}
+  .gets{gap:6pt;margin:8pt 0 4pt}
+  .get{padding:6pt 8pt;border-radius:6pt;flex-direction:row;align-items:center;gap:6pt;font-size:9.4pt}
+  .get .ic{width:22pt;height:22pt;border-radius:5pt}.get .ic .ico{width:13pt;height:13pt}
+  .block{margin:8pt 0}
+  .block h3,.h3{font-size:11.5pt;margin-bottom:4pt;gap:6pt}
+  .flow{gap:5pt;margin:6pt 0 4pt}.flow div{padding:5pt 6pt;font-size:8.6pt;border-radius:5pt}.flow b{font-size:9.8pt}
+  .note{font-size:8.8pt}
+  .needs{gap:3pt}.needs li{padding:3pt 7pt;border-radius:5pt}
+  .gate{padding:7pt 10pt;margin:8pt 0;border-radius:6pt;break-inside:avoid}
+  .gate .gt{font-size:11pt;margin-bottom:3pt}.gate .gt .ico{width:14pt;height:14pt}
+  .gate ul{margin-top:3pt}
+  .shot{margin:5pt 0 2pt;max-width:60%}.shot figcaption{font-size:8pt;margin-top:2pt}
+  .part{padding:0}
+  .pb{break-before:page}
+  .part-head{padding-bottom:5pt;margin-bottom:2pt;border-bottom-width:2pt;gap:8pt}
+  .part-head .badge{width:26pt;height:26pt;border-radius:6pt}.part-head .badge .ico{width:15pt;height:15pt}
+  .eyebrow{font-size:7.5pt}.part-head h2{font-size:16pt}.sub{font-size:8.8pt;margin-top:1pt}
+  .bar{margin:9pt 0 4pt;padding:3pt 8pt;font-size:10.5pt;border-radius:4pt;break-after:avoid}
+  .bar .time{font-size:8.5pt}
+  .step{margin:5pt 0 8pt}
+  .sh{margin-bottom:3pt;gap:6pt;break-after:avoid}.sh h3{font-size:10.6pt}.num{font-size:14pt}
+  .chip{font-size:7pt;padding:1.5pt 5pt;border-radius:3pt}
+  .where,.step>p{font-size:9pt;margin-bottom:3pt}
+  .prompt{border-radius:5pt;break-inside:avoid;border-left-width:3.5pt}
+  .prompt.long{break-inside:auto}
+  .ph{display:none}
+  pre{font-size:8pt;line-height:1.34;padding:5pt 7pt}
+  .check{margin-top:4pt;padding:4pt 8pt;border-radius:5pt;break-inside:avoid}
+  .check .ct{margin-bottom:0;gap:5pt;font-size:9.2pt}
+  .cl{display:flex;flex-wrap:wrap;gap:0 12pt}
+  .cl label{min-height:0;padding:1pt 0;gap:5pt;font-size:9pt}
+  .cl input{width:9pt;height:9pt;border-width:1pt;border-radius:2pt}
+  .cl input:checked+span{text-decoration:none;color:var(--ink)}
+  .check .after{font-size:8.6pt;margin-top:1pt}
+  .week.cl{display:block}
+  .files{gap:4pt}.file{padding:4pt 8pt;border-radius:5pt;break-inside:avoid}
+  .file .fh label{min-height:0;font-size:10pt;gap:6pt}
+  .type{font-size:6.8pt;padding:1pt 4pt}
+  .file p{font-size:8.9pt;margin-left:15pt}
+  .styles{gap:5pt}.styles .file p{margin-left:0;margin-top:2pt}.styles .file b.n{font-size:10pt}.styles .how{font-size:8.6pt;margin-top:3pt!important;padding-top:3pt}
+  .made{gap:3pt}.made li{padding:3pt 8pt;border-radius:5pt}.made b{font-size:9.4pt}.gdoc{width:11pt;height:11pt}.made b.gd{gap:4pt}.made .by{font-size:8pt}.made span.w{font-size:8.7pt}
+  .legend{gap:5pt 10pt;font-size:9pt}
+  code.sample{font-size:7.8pt;padding:1pt 5pt}
+}
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#140f1f">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#140f1f"/>
+    <mask id="cm"><rect width="1200" height="800" fill="white"/><circle cx="660" cy="350" r="150" fill="black"/></mask>
+    <circle cx="600" cy="400" r="170" fill="#c9a8ff" mask="url(#cm)"/>
+  </svg>
+</template>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+  <symbol id="i-hand" viewBox="0 0 24 24"><path d="M12 3v9M12 12l-4 4M12 12l4 4M5 21h14"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+</svg>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top">Make AI Work In Your Sleep</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#setup" style="--c:var(--orange)" data-for="setup"><i></i>Setup</a>
+      <a href="#part1" style="--c:var(--blue)" data-for="part1"><i></i>Part 1</a>
+      <a href="#part2" style="--c:var(--green)" data-for="part2"><i></i>Part 2</a>
+      <a href="#week" style="--c:var(--green)" data-for="week"><i></i>This week</a>
+    </nav>
+    <a class="theme" href="https://www.linkedin.com/in/dakotayang" target="_blank" rel="noopener" aria-label="Dakota Yang on LinkedIn" title="Dakota Yang on LinkedIn">in</a>
+  </div>
+  <div class="prog"><span></span></div>
+</header>
+
+<main class="wrap" id="top">
+
+<section class="hero">
+  <div class="kicker">Build guide · Claude or ChatGPT</div>
+  <h1>Make AI Work In Your Sleep</h1>
+  <p class="lede">AI Job Search &amp; Resume Tailoring, Runs In Google Drive</p>
+  <div class="gets">
+    <div class="get p1"><span class="ic"><svg class="ico"><use href="#i-sun"/></svg></span>Job Search Runs at 9 AM</div>
+    <div class="get p2"><span class="ic"><svg class="ico"><use href="#i-doc"/></svg></span>Tailored Resume For Any JD</div>
+    <div class="get setup"><span class="ic"><svg class="ico"><use href="#i-folder"/></svg></span>Lives In Google Drive</div>
+  </div>
+  <a class="cta" href="#setup">Start with Step 0 <svg class="ico"><use href="#i-down"/></svg></a>
+</section>
+
+<div class="gate red">
+  <div class="gt"><svg class="ico"><use href="#i-alert"/></svg><span>READ EACH STEP CAREFULLY</span></div>
+  <p>If you miss a step or instruction, it'll cost more time later to fix it</p>
+</div>
+
+<div class="block">
+  <div class="flow">
+    <div><b>Instructions</b>Who you are + your rules</div>
+    <div><b>Knowledge</b>What it looks up</div>
+    <div><b>Skills</b>Tasks done the same way</div>
+    <div><b>Trigger</b>Runs on a schedule</div>
+  </div>
+  <p class="note"><svg class="ico"><use href="#i-hand"/></svg><span>You pick where to apply and hit submit. The AI never applies or emails for you.</span></p>
+</div>
+
+<div class="block">
+  <h3>What you need</h3>
+  <ul class="needs">
+    <li><svg class="ico"><use href="#i-check"/></svg><span><b>Paid plan:</b> Claude Pro+ (use <b>Sonnet</b>) or ChatGPT Plus</span></li>
+    <li><svg class="ico"><use href="#i-folder"/></svg><span><b>Google account</b> with your resume</span></li>
+    <li><svg class="ico"><use href="#i-doc"/></svg><span><b>2 real job descriptions</b>, as text</span></li>
+    <li><svg class="ico"><use href="#i-clock"/></svg><span><b>~90 min:</b> Part 1 (~50) today, Part 2 (~45) later</span></li>
+  </ul>
+</div>
+
+<div class="gate red" id="connect">
+  <div class="gt"><svg class="ico"><use href="#i-alert"/></svg><span>Connect Google to your AI first</span></div>
+  <p>Not connected? The AI won't error. It <b>guesses</b>, and guesses look real.</p>
+  <ul>
+    <li><b>Claude:</b> Settings → Connectors → add <img class="gi" src="google-drive.png" alt="" width="18" height="18"><b>Google Drive</b>, <img class="gi" src="google-docs.png" alt="" width="18" height="18"><b>Google Docs</b>, <img class="gi" src="google-sheets.png" alt="" width="18" height="18"><b>Google Sheets</b>, <img class="gi" src="gmail.png" alt="" width="18" height="18"><b>Gmail</b>. Then Settings → Capabilities → turn on <b>code execution and file creation</b>.<figure class="shot"><img src="claude-connectors.png" alt="Claude Settings → Connectors showing Google Drive, Calendar, Sheets, Docs, Slides, and Gmail connected" loading="lazy" width="1864" height="1392"><figcaption>What it looks like when they're connected.</figcaption></figure></li>
+    <li><b>ChatGPT Plus:</b> Settings → Apps → connect <img class="gi" src="google-drive.png" alt="" width="18" height="18"><b>Google Drive</b> and <img class="gi" src="gmail.png" alt="" width="18" height="18"><b>Gmail</b>.</li>
+    <li><b>Test</b> in a new chat: <i>"What are 3 recent files in my Google Drive, and what's the subject of my latest email?"</i> Wrong answer? Fix connectors first.</li>
+  </ul>
+</div>
+
+<!-- STEP 0 -->
+<section class="part setup pb" id="setup" data-part>
+  <div class="part-head">
+    <div class="badge"><svg class="ico"><use href="#i-folder"/></svg></div>
+    <div><div class="eyebrow">SETUP</div><h2>Step 0 · Set up your Google Drive</h2><p class="sub">~10 min · use these exact names</p></div>
+  </div>
+
+  <div class="block">
+    <h3>Must be in Drive first <span class="chip you">YOU DO THIS</span></h3>
+    <div class="files cl">
+      <div class="file"><div class="fh"><label><input type="checkbox" data-k="s0-folder"><span>AI Job Search</span></label><span class="type"><img class="gdoc" src="google-drive.png" alt="" width="20" height="20">Folder</span></div>
+        <p>Drive → New → New folder. Everything goes inside.</p></div>
+      <div class="file"><div class="fh"><label><input type="checkbox" data-k="s0-resume"><span>Resume</span></label><span class="type" style="color:oklch(0.78 0.16 245);border-color:oklch(0.78 0.16 245)"><img class="gdoc" src="google-docs.png" alt="" width="20" height="20">Google Doc</span></div>
+        <p><b>Must be a Google Doc, not PDF or Word.</b> Have a PDF/.docx? Upload → right-click → Open with → Google Docs. Rename it <img class="gi" src="google-docs.png" alt="" width="18" height="18"><b>Resume</b>. Delete the original.</p></div>
+      <div class="file"><div class="fh"><label><input type="checkbox" data-k="s0-template"><span>Resume Template</span></label><span class="type" style="color:oklch(0.78 0.16 245);border-color:oklch(0.78 0.16 245)"><img class="gdoc" src="google-docs.png" alt="" width="20" height="20">Google Doc</span></div>
+        <p>The look for your tailored resumes. AI copies the <b>layout</b>, not the words.</p></div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>Pick your Resume Template</h3>
+    <div class="styles">
+      <div class="file tpl" style="border:2px solid #b31b1b"><div class="tpl-prev"><img src="harvard-template.png" alt="Preview of the Harvard style resume template" loading="lazy" width="1212" height="1212"></div><b class="n">Harvard style</b><p>Classic single column. Safe for most roles.</p><a class="tpl-btn" href="https://docs.google.com/document/d/11Ime4kk-Y2hAxWn9QMrkdOjJJmxlfperFZctaRx0nCA/edit?usp=sharing" target="_blank" rel="noopener" style="--bc0:#e04848">Open template ↗</a></div>
+      <div class="file tpl" style="border:2px solid #9a6a3f"><div class="tpl-prev"><img src="brown-template.png" alt="Preview of the Brown style resume template" loading="lazy" width="1600" height="1536"></div><b class="n">Brown style</b><p>Denser. Fits more experience.</p><a class="tpl-btn" href="https://docs.google.com/document/d/1plo3RXw3IrWpQvaPPIAcT70JH2OnR1WNT6oc416SQvA/edit?usp=sharing" target="_blank" rel="noopener" style="--bc0:#c08a56">Open template ↗</a></div>
+      <div class="file" style="border:2px solid transparent;background:linear-gradient(var(--panel),var(--panel)) padding-box,linear-gradient(120deg,#ff4d4d,#ffa84d,#ffe14d,#4dd97a,#4db8ff,#8a6bff,#e05cff) border-box"><b class="n">Your own style</b><p>Like your current look?</p><p class="how"><img class="gi" src="google-docs.png" alt="" width="18" height="18"><b>Resume</b> → File → Make a copy → name it <img class="gi" src="google-docs.png" alt="" width="18" height="18"><b>Resume Template</b> → save in <img class="gi" src="google-drive.png" alt="" width="18" height="18"><b>AI Job Search</b>.</p></div>
+    </div>
+    <div class="card" style="margin-top:10px;padding:12px 14px">
+      <p><b>Harvard or Brown:</b> Open template → File → Make a copy → save it in <img class="gi" src="google-drive.png" alt="" width="18" height="18"><b>AI Job Search</b> as <img class="gi" src="google-docs.png" alt="" width="18" height="18"><b>Resume Template</b>.</p>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>Have ready, outside Drive</h3>
+    <ul class="cl">
+      <li><label><input type="checkbox" data-k="s0-jd"><span><b>Job description #1</b> and <b>#2</b> (full text)</span></label></li>
+    </ul>
+  </div>
+
+  <div class="block">
+    <h3>Created for you by the prompts (DON'T MAKE MANUALLY!)</h3>
+    <ul class="made">
+      <li><b class="gd"><img class="gdoc" src="google-sheets.png" alt="" width="20" height="20">Job Tracker</b><span class="by">Prompt ①</span><span class="w">Sheet. <b>Roles</b> = jobs found or applied. <b>Run Log</b> = search history.</span></li>
+      <li><b class="gd"><img class="gdoc" src="google-docs.png" alt="" width="20" height="20">ME</b><span class="by">Prompt ②</span><span class="w">You, your goals, dealbreakers, fit bar</span></li>
+      <li><b class="gd"><img class="gdoc" src="google-docs.png" alt="" width="20" height="20">Bullet Bank</b><span class="by">Prompt ⑥</span><span class="w">Every bullet you could use</span></li>
+      <li><b class="gd"><img class="gdoc" src="google-docs.png" alt="" width="20" height="20">Resume - [Company] - [Role]</b><span class="by">Prompt ⑦</span><span class="w">Each tailored resume</span></li>
+      <li><b class="gd"><img class="gdoc" src="google-docs.png" alt="" width="20" height="20">Sizing Guide</b><span class="by">Prompt ⑧</span><span class="w">Margins, fonts, spacing that fit one page</span></li>
+    </ul>
+  </div>
+
+  <div class="gate green">
+    <div class="gt"><svg class="ico"><use href="#i-check"/></svg><span>Step 0 done: <img class="gi" src="google-drive.png" alt="" width="18" height="18">folder has <img class="gi" src="google-docs.png" alt="" width="18" height="18">Resume + <img class="gi" src="google-docs.png" alt="" width="18" height="18">Resume Template</span></div>
+    <p>Icons should be blue Docs, not red PDF or Word.</p>
+  </div>
+<div class="block pb" id="legend">
+  <h3><svg class="ico"><use href="#i-info"/></svg>How to read this guide</h3>
+  <div class="legend card">
+    <code class="sample">Grey box</code><div><b>Paste exactly, one at a time.</b> Let the AI finish first.</div>
+    <code class="sample"><span class="fill">[brackets]</span></code><div>Fill in your info.</div>
+    <span class="chip new">NEW CHAT</span><div><b>Start a fresh chat.</b> Long chats waste usage and get sloppy. Your work is in Drive.</div>
+    <span class="chip same">SAME CHAT</span><div>Stay in this chat.</div>
+    <span class="chip set">SETTINGS</span><div>Paste into settings, not a chat.</div>
+    <span class="chip you">YOU DO THIS</span><div>Manual step, no prompt.</div>
+  </div>
+  <p class="note" style="margin-top:8px"><svg class="ico"><use href="#i-info"/></svg><span>Each prompt ends with a recap and your next step.</span></p>
+</div>
+</section>
+
+<section class="part p1" id="part1" data-part>
+  <div class="part-head">
+    <div class="badge"><svg class="ico"><use href="#i-search"/></svg></div>
+    <div><div class="eyebrow">PART 1</div><h2>Your daily job search</h2><p class="sub">~50 min · tracker → ME → skill → run → schedule</p></div>
+  </div>
+
+  <div class="bar"><span>Step 1 · Tracker</span><span class="time"><svg class="ico"><use href="#i-clock"/></svg>~5 min</span></div>
+  <article class="step">
+    <div class="sh"><span class="num">①</span><h3>Make your tracker</h3><span class="chip new">NEW CHAT</span></div>
+    <div class="prompt"><div class="ph"><span>Paste this</span><button class="copy" type="button">Copy</button></div><pre>Create a Google Sheet called "Job Tracker" in my "AI Job Search" Google Drive folder with two tabs.
+Tab "Roles", columns: Company, Role, Status, Date Found, Date Posted, Link, Fit, Timeline, Location, Source, Notes.
+Tab "Run Log", columns: Run Date, Search Window, Searches Run, New Roles Added, Notes. Leave it empty.
+Then search my Gmail from the last 2 months for application emails. Confirmations ("thanks for applying," "application received," "thank you for your interest") go in Roles with Status = Applied. Rejections go in with Status = Rejected. Use the email's date, Source = Gmail, one row per role. If you find nothing, say so and ask me to list any applications I remember.
+When you're done, give me 3-5 short bullets on what you created and how many rows you added, flag anything you weren't sure about, and end with "Next:" telling me to open a new chat and paste prompt ②.</pre></div>
+    <div class="check">
+      <div class="ct"><svg class="ico"><use href="#i-check"/></svg>Check the Sheet</div>
+      <ul class="cl">
+        <li><label><input type="checkbox" data-k="c1-tabs"><span>Two tabs?</span></label></li>
+        <li><label><input type="checkbox" data-k="c1-rows"><span>Real applications?</span></label></li>
+      </ul>
+      <p class="after">Fix wrong rows by hand.</p>
+    </div>
+  </article>
+
+  <div class="bar"><span>Step 2 · ME</span><span class="time"><svg class="ico"><use href="#i-clock"/></svg>~15 min</span></div>
+  <article class="step">
+    <div class="sh"><span class="num">②</span><h3>ME interview</h3><span class="chip new">NEW CHAT</span></div>
+    <div class="prompt long"><div class="ph"><span>Paste this</span><button class="copy" type="button">Copy</button></div><pre>Read my "Resume" Google Doc in my "AI Job Search" Drive folder. Then interview me to write my "ME" doc. Ask one question at a time and wait for my answer (15 questions max). If an answer is vague, ask one follow-up (for example, "anything in tech" → which 2-3 roles?).
+Cover: my phone, email, LinkedIn URL, and city; grad date or years of experience; my top 2-3 target roles plus adjacent roles I'd take; level (internship, new grad, experienced) and when I can start; locations and on-site, hybrid, or remote; company size or stage; industries I want and ones I'd avoid; my pay floor; whether I'll need visa sponsorship; dealbreakers; 5-10 dream companies; my 2-3 strongest skills or stories; and how I want you to answer me (length, tone, how blunt).
+Then, from my resume and answers, propose my Honest fit bar: one sentence on what level of role my resume qualifies me for today. Be realistic, not flattering. Ask me to confirm or adjust it.
+Write the doc in under 450 words with these headings: Contact, Background, Target roles, Timeline, Locations, Company preferences, Dealbreakers, Dream companies, Strengths, Honest fit bar, How I want answers. Save it as a Google Doc called "ME" in the same folder.
+When you're done, give me 3-5 short bullets on what you saved, and end with "Next:" telling me to paste prompt ③ into my custom instructions (not into a chat).</pre></div>
+    <div class="check">
+      <div class="ct"><svg class="ico"><use href="#i-check"/></svg>Check:</div>
+      <ul class="cl">
+        <li><label><input type="checkbox" data-k="c2-fitbar"><span>Read the Honest fit bar aloud. Too generous? Edit it.</span></label></li>
+      </ul>
+      <p class="after">All fit scores use it.</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <div class="sh"><span class="num">③</span><h3>Custom instructions</h3><span class="chip set">SETTINGS</span></div>
+    <p class="where">Claude: Settings → personal preferences · ChatGPT: Settings → Personalization → custom instructions</p>
+    <div class="prompt"><div class="ph"><span>Paste in settings</span><button class="copy" type="button">Copy</button></div><pre>When I ask about jobs, applications, or my resume, first read my "ME" doc, "Job Tracker" sheet, and "Bullet Bank" doc (once it exists) in my "AI Job Search" Google Drive folder, and follow ME's rules. After any multi-step task, end with a short bullet recap of what you did and what I should do next.</pre></div>
+  </article>
+
+  <div class="bar pb"><span>Step 3 · Build the job search</span><span class="time"><svg class="ico"><use href="#i-clock"/></svg>~5 min to build · ~10 min first run</span></div>
+  <article class="step">
+    <div class="sh"><span class="num">④</span><h3>Build the daily-job-search skill</h3><span class="chip new">NEW CHAT</span></div>
+    <div class="prompt long"><div class="ph"><span>Paste this</span><button class="copy" type="button">Copy</button></div><pre>Create a skill called daily-job-search that runs when I say "run my job search." Write it so it works in a brand-new chat with no memory of this one. The skill must:
+1. Read my "ME" doc and both tabs of my "Job Tracker" sheet in my "AI Job Search" Google Drive folder.
+2. Set the search window. If the Run Log tab is empty, this is my first run: find roles posted in the past 14 days. Otherwise, find roles posted since the most recent Run Date (usually the past 1-2 days, never more than 14), so searches never overlap or leave gaps.
+3. Run up to 15 web searches for my target roles, level, locations, and timeline. Include site:boards.greenhouse.io, site:jobs.lever.co, and site:jobs.ashbyhq.com, my dream companies' career pages, and GitHub job lists (like SimplifyJobs'). Never scrape LinkedIn or Handshake.
+4. Open each posting to confirm it's live and find its posted date. If it won't open, try the Greenhouse, Lever, or Ashby job API; still nothing? Mark it Unverified. Keep only roles posted inside the window. No date shown? Keep it only if it isn't already in my tracker, and write "date unknown."
+5. Skip anything already in my Roles tab (same company and role, or same link), closed, or hitting a dealbreaker.
+6. Score fit 1-10 against my Honest fit bar with one line why. A 4 is a 4. Don't pad the list; two strong roles beat ten weak ones.
+7. Add each new role to Roles with Status "Not applied," Date Found = today, Date Posted, and Source. Add one Run Log row: today's date, the window, searches run, new roles added.
+8. Deliver an HTML briefing, self-contained with inline CSS (Claude: as an artifact; ChatGPT: in canvas or as a downloadable .html file). Style: off-white page, one centered 800px column, clean sans-serif font. Header: "Job Search Briefing," the date, and a one-line summary, over a thick dark rule. Small uppercase grey section labels. Each role is a white card with rounded corners, a thin border, and a colored left edge with a matching fit badge (green 7-10, amber 5-6, red 1-4), then a large green "View posting →" button. Sections, in order: Summary (window searched, new roles found, top pick); New roles ranked by fit, grouped by timeline (each card: role, company, fit, location, date posted, source, one-line why); Check manually (a LinkedIn link for each target role and city, filtered to the same window by adding &amp;f_TPR=r[window in seconds], plus a reminder to check Handshake); What didn't work (sites that wouldn't open); and a footer with the window, searches run, and tracker row count. Nothing new? Say so in a short briefing in the same style.
+Put the full HTML and CSS template inside the skill so every briefing looks the same. Never apply to jobs or email anyone.
+Then give me the skill to install (Claude: a skill file; ChatGPT without Skills: text for a Project's instructions). When you're done, give me 3-5 short bullets on what the skill does, then "Next:" with the exact install steps for my tool, and tell me to open a new chat and type "run my job search."</pre></div>
+    <p class="where" style="margin-top:10px;color:var(--ink)"><b>Install:</b> Claude: Customize → Skills → upload. ChatGPT: Skills (beta), or paste into a Project's instructions and search inside it.</p>
+  </article>
+
+  <article class="step">
+    <div class="sh"><h3>First run</h3><span class="chip new">NEW CHAT</span><span class="chip you">YOU DO THIS</span></div>
+    <p>Type: <b>run my job search</b>. First run covers <b>14 days</b> and takes a few minutes. Later runs cover only new days.</p>
+    <div class="check">
+      <div class="ct"><svg class="ico"><use href="#i-check"/></svg>Check the briefing:</div>
+      <ul class="cl">
+        <li><label><input type="checkbox" data-k="cr-14"><span>Searched past 14 days?</span></label></li>
+        <li><label><input type="checkbox" data-k="cr-date"><span>Every card has a date?</span></label></li>
+        <li><label><input type="checkbox" data-k="cr-dupe"><span>No jobs you already applied to?</span></label></li>
+        <li><label><input type="checkbox" data-k="cr-live"><span>"View posting" opens live jobs?</span></label></li>
+        <li><label><input type="checkbox" data-k="cr-fit"><span>Fit scores honest?</span></label></li>
+        <li><label><input type="checkbox" data-k="cr-log"><span>Run Log row added?</span></label></li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="step">
+    <div class="sh"><h3>Fix what's off</h3><span class="chip same">SAME CHAT</span></div>
+    <div class="prompt"><div class="ph"><span>Paste this</span><button class="copy" type="button">Copy</button></div><pre>Update daily-job-search to always <span class="fill">[your fix, e.g. "skip roles that need 3+ years of experience"]</span>. Give me the new version, then 3 bullets on what changed and "Next:" with how to reinstall it.</pre></div>
+  </article>
+
+  <div class="bar pb"><span>Step 4 · Put it on a schedule</span><span class="time"><svg class="ico"><use href="#i-clock"/></svg>~3 min</span></div>
+  <article class="step">
+    <div class="sh"><span class="num">⑤</span><h3>Schedule the daily run</h3><span class="chip set">SETTINGS</span></div>
+    <p class="where">Claude: <b>Scheduled tasks</b> → new task · ChatGPT: <b>Tasks</b>. Pick a time before you wake. Paste:</p>
+    <figure class="shot"><img src="claude-scheduled.png" alt="Claude Scheduled tasks page with the New task menu open, showing Create with Claude and Set up manually" loading="lazy" width="1442" height="1030"><figcaption>Claude: Scheduled → New task.</figcaption></figure>
+    <div class="prompt"><div class="ph"><span>Paste as task prompt</span><button class="copy" type="button">Copy</button></div><pre>Run my job search using my daily-job-search skill. Use the window from my Run Log (since the last run) so nothing overlaps. Don't apply to anything or email anyone. Deliver the HTML briefing, then 3 bullets: how many new roles, the top pick and why, and anything that broke.</pre></div>
+  </article>
+  <div class="gate blue">
+    <div class="gt"><svg class="ico"><use href="#i-info"/></svg><span>Scheduled run can't reach Drive or your skill?</span></div>
+    <p>Run it by hand: new chat → <b>run my job search</b>. The Run Log prevents repeats.</p>
+  </div>
+</section>
+
+<section class="part p2" id="part2" data-part>
+  <div class="part-head">
+    <div class="badge"><svg class="ico"><use href="#i-doc"/></svg></div>
+    <div><div class="eyebrow">PART 2</div><h2>Your resume tailor</h2><p class="sub">~45 min · bullets → tailor → sizing → skill → test</p></div>
+  </div>
+
+  <div class="bar"><span>Step 5 · Bullet bank</span><span class="time"><svg class="ico"><use href="#i-clock"/></svg>~15 min</span></div>
+  <article class="step">
+    <div class="sh"><span class="num">⑥</span><h3>Build your bullet bank</h3><span class="chip new">NEW CHAT</span></div>
+    <div class="prompt long"><div class="ph"><span>Paste this</span><button class="copy" type="button">Copy</button></div><pre>Read my "Resume" Google Doc and my "ME" doc in my "AI Job Search" Drive folder. Build a bullet bank: every bullet on my resume, plus new ones.
+First, interview me one question at a time (10 questions max) about work that isn't on my resume yet, and about bullets missing a number: projects, clubs, part-time jobs, volunteering, results, tools I used, team size, how often, for whom.
+Then write 3-5 bullets for every job, club, and project, grouped under each one's title, organization, dates, and city (ask for any that are missing). Add my school, degree, and grad date, and a Skills list. Write every bullet in Google XYZ form with the number in the first few words: "Grew X by [number] by doing Z." Never invent a number; write [#?] where one is missing.
+Save it as a Google Doc called "Bullet Bank" in "AI Job Search."
+When you're done, give me 3-5 short bullets: how many bullets each role got, which roles are thin, and how many [#?] gaps there are. End with "Next:" telling me to fill any [#?] I can in the Doc, then open a new chat and paste prompt ⑦ with job description #1.</pre></div>
+    <p class="note" style="margin-top:10px"><svg class="ico"><use href="#i-info"/></svg><span>More bullets than fit is the point. The tailor picks.</span></p>
+  </article>
+
+  <div class="bar pb"><span>Step 6 · Tailor, capture, test</span><span class="time"><svg class="ico"><use href="#i-clock"/></svg>~30 min</span></div>
+  <article class="step">
+    <div class="sh"><span class="num">⑦</span><h3>Tailor once, by hand</h3><span class="chip new">NEW CHAT</span></div>
+    <div class="prompt long"><div class="ph"><span>Paste this + job #1</span><button class="copy" type="button">Copy</button></div><pre>Tailor my resume to the job below. From my Bullet Bank, give every role 2-4 bullets, strongest first; a true, less on-target bullet beats a role with only one. Under 2 true bullets for a role? Keep what's real and tell me which. Rewrite each in the posting's language: one line, XYZ form, number or result in the first 8 words (no real number, or a [#?]? Lead with scope: how many, how often, for whom). Never invent a number, title, tool, or date; keep titles and dates exactly as in my bank; never repeat a result.
+Then make a Google Doc "Resume - [Company] - [Role]" in my "AI Job Search" folder, matching my "Resume Template" Doc's layout and formatting. Top: my name, then phone | email | LinkedIn | city from ME. Headings: EDUCATION, WORK EXPERIENCE (jobs), LEADERSHIP &amp; PROJECTS (clubs, projects), SKILLS (2-3 one-line rows, no Interests). Cut lines I lack info for.
+Then fit it to exactly one page: nothing wraps to a second line, no gap at the bottom. Too long? Cut the weakest bullet (keep 2+ per role), then words, then margins (min 0.5") or font (min 10pt). Too short? Add true bullets from my bank; out of good ones, raise font and spacing a step at a time until it's full (max 12pt).
+When you're done, give me 3-5 short bullets on what you changed, a one-line tagline in the posting's language, and 3 keywords from the posting I'm missing. End with "Next:" telling me to open the Doc, check it, and tell you what to fix in this same chat.
+<span class="fill">[paste job description #1]</span></pre></div>
+    <div class="check">
+      <div class="ct"><svg class="ico"><use href="#i-check"/></svg>Correct it at least once <span class="chip same">SAME CHAT</span></div>
+      <ul class="cl">
+        <li><label><input type="checkbox" data-k="c7-contact"><span>Contact line right?</span></label></li>
+        <li><label><input type="checkbox" data-k="c7-bullets"><span>2+ bullets per role?</span></label></li>
+        <li><label><input type="checkbox" data-k="c7-heads"><span>Right headings?</span></label></li>
+        <li><label><input type="checkbox" data-k="c7-page"><span>One page, no wrapped lines or gap?</span></label></li>
+        <li><label><input type="checkbox" data-k="c7-tpl"><span>Matches template?</span></label></li>
+      </ul>
+      <p class="after">Say what's wrong in plain words. Fixes go into the skill in ⑨.</p>
+    </div>
+  </article>
+
+  <article class="step">
+    <div class="sh"><span class="num">⑧</span><h3>Lock the sizing</h3><span class="chip same">SAME CHAT</span></div>
+    <div class="prompt"><div class="ph"><span>Paste this</span><button class="copy" type="button">Copy</button></div><pre>It fits. Save a Google Doc called "Sizing Guide" in my "AI Job Search" folder: margins, font and size for each part (name, headings, role lines, bullets), spacing, and the longest bullet that fit on one line. Add one step smaller and one step larger (text ±0.5pt, spacing ±2pt). Future resumes add good bullets first, then use the step that fills the page. When you're done, give me 2-3 bullets on what you saved and "Next:" telling me to paste prompt ⑨ in this same chat.</pre></div>
+  </article>
+
+  <article class="step">
+    <div class="sh"><span class="num">⑨</span><h3>Save it as a skill</h3><span class="chip same">SAME CHAT</span></div>
+    <div class="prompt"><div class="ph"><span>Paste this</span><button class="copy" type="button">Copy</button></div><pre>Turn this into a skill called tailor-resume, with every correction I made in this chat. It reads my "Sizing Guide," "Bullet Bank," "ME," and "Resume Template" first. It runs when I paste a job and ask to tailor my resume. Give me the skill to install (Claude: a skill file; ChatGPT without Skills: text for a Project's instructions). When you're done, give me 3-5 bullets on what the skill does and "Next:" with the exact install steps, then tell me to test it in a new chat with a different job description.</pre></div>
+  </article>
+
+  <article class="step">
+    <div class="sh"><h3>Test</h3><span class="chip new">NEW CHAT</span><span class="chip you">YOU DO THIS</span></div>
+    <p>Paste job description #2, then type: <b>tailor my resume for this</b></p>
+    <div class="check">
+      <div class="ct"><svg class="ico"><use href="#i-check"/></svg>Check:</div>
+      <ul class="cl">
+        <li><label><input type="checkbox" data-k="ct-fire"><span>Skill fired?</span></label></li>
+        <li><label><input type="checkbox" data-k="ct-invent"><span>Nothing invented?</span></label></li>
+        <li><label><input type="checkbox" data-k="ct-nums"><span>Numbers early?</span></label></li>
+        <li><label><input type="checkbox" data-k="ct-contact"><span>Contact line right?</span></label></li>
+        <li><label><input type="checkbox" data-k="ct-bullets"><span>2+ bullets per role?</span></label></li>
+        <li><label><input type="checkbox" data-k="ct-heads"><span>Right headings?</span></label></li>
+        <li><label><input type="checkbox" data-k="ct-page"><span>One page, no gap?</span></label></li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="step">
+    <div class="sh"><span class="num">⑩</span><h3>Fix</h3><span class="chip same">SAME CHAT</span></div>
+    <div class="prompt"><div class="ph"><span>Paste this</span><button class="copy" type="button">Copy</button></div><pre>Update tailor-resume to always <span class="fill">[your fix]</span>. Give me the new version, then 3 bullets on what changed and "Next:" with how to reinstall it.</pre></div>
+  </article>
+
+  <div class="wk" id="week" data-part style="scroll-margin-top:60px">
+  <div class="gate green" style="margin-top:8px">
+    <div class="gt"><svg class="ico"><use href="#i-flag"/></svg><span>This week</span></div>
+    <ul class="cl week">
+      <li><label><input type="checkbox" data-k="w-read"><span>Read your briefing 3 mornings. Fix the skill when something's off (same "Update … to always" prompt).</span></label></li>
+      <li><label><input type="checkbox" data-k="w-fit"><span>Tighten your fit bar if scores feel generous.</span></label></li>
+      <li><label><input type="checkbox" data-k="w-skill3"><span>Build skill #3: by hand → correct → save as skill → test → fix. Try: cover letter, follow-up email, interview prep.</span></label></li>
+    </ul>
+  </div>
+  </div>
+</section>
+
+</main>
+<footer class="wrap">Your checkmarks are saved in this browser only.</footer>
+
+<script>
+(function(){
+  var KEY='aiosGuide.checks.v1',st={};
+  try{st=JSON.parse(localStorage.getItem(KEY))||{};}catch(e){st={};}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
+  Array.prototype.forEach.call(document.querySelectorAll('input[type=checkbox][data-k]'),function(cb){
+    cb.checked=!!st[cb.getAttribute('data-k')];
+    cb.addEventListener('change',function(){st[cb.getAttribute('data-k')]=cb.checked;save();});
+  });
+
+  function fallbackCopy(t){
+    var ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');
+    ta.style.position='fixed';ta.style.top='-1000px';document.body.appendChild(ta);ta.select();
+    var ok=false;try{ok=document.execCommand('copy');}catch(e){}document.body.removeChild(ta);return ok;
+  }
+  function copyText(t){
+    if(navigator.clipboard&&window.isSecureContext){
+      return navigator.clipboard.writeText(t).then(function(){return true;},function(){return fallbackCopy(t);});
+    }
+    return Promise.resolve(fallbackCopy(t));
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.prompt'),function(p){
+    var b=p.querySelector('.copy'),pre=p.querySelector('pre'),timer;
+    b.setAttribute('aria-live','polite');
+    b.addEventListener('click',function(){
+      copyText(pre.textContent).then(function(ok){
+        clearTimeout(timer);
+        b.textContent=ok?'Copied ✓':'Select & copy';
+        if(ok)b.classList.add('ok');
+        timer=setTimeout(function(){b.textContent='Copy';b.classList.remove('ok');},2000);
+      });
+    });
+  });
+
+  var links={},bar=document.querySelector('.prog span');
+  Array.prototype.forEach.call(document.querySelectorAll('.nav a'),function(a){links[a.getAttribute('data-for')]=a;});
+  var parts=Array.prototype.slice.call(document.querySelectorAll('[data-part]'));
+  function onScroll(){
+    var y=window.scrollY,h=document.documentElement.scrollHeight-innerHeight;
+    bar.style.width=(h>0?Math.min(100,y/h*100):0)+'%';
+    var cur=null;
+    parts.forEach(function(s){if(s.getBoundingClientRect().top<innerHeight*0.4)cur=s.id;});
+    if(y+innerHeight>=document.documentElement.scrollHeight-4)cur='week';
+    for(var k in links){links[k].setAttribute('aria-current',k===cur?'true':'false');}
+    bar.style.setProperty('--c',cur&&links[cur]?getComputedStyle(links[cur]).getPropertyValue('--c'):'var(--orange)');
+  }
+  addEventListener('scroll',onScroll,{passive:true});addEventListener('resize',onScroll);onScroll();
+
+  var reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function all(s){return Array.prototype.slice.call(document.querySelectorAll(s));}
+  all('.gets,.flow,.needs,.files,.styles,.made').forEach(function(el){el.classList.add('stg');});
+  all('.hero>*:not(.gets),.block>h3,.block>.legend,.block>.card,.block>.note,.block>.flow+.note,.gate,.bar,.step,.check').forEach(function(el){if(!el.closest('.stg'))el.classList.add('rv');});
+  var revealEls=all('.rv,.stg');
+  function showAll(){revealEls.forEach(function(el){el.classList.add('in');});}
+  if(!('IntersectionObserver' in window)||reduceMotion){showAll();}
+  else{
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:0.15,rootMargin:'0px 0px -8% 0px'});
+    revealEls.forEach(function(el){io.observe(el);});
+    var pending=false;
+    function sweep(){var vh=innerHeight;revealEls.forEach(function(el){if(el.classList.contains('in'))return;if(el.getBoundingClientRect().top<vh*1.15){el.classList.add('in');io.unobserve(el);}});pending=false;}
+    addEventListener('scroll',function(){if(!pending){pending=true;requestAnimationFrame(sweep);}},{passive:true});
+    addEventListener('resize',sweep);sweep();
+  }
+  addEventListener('beforeprint',showAll);
+
+  var pixelEls=all('.hero h1,.part-head h2');
+  if(pixelEls.length&&!reduceMotion&&'IntersectionObserver' in window){
+    pixelEls.forEach(function(el){
+      var text=el.textContent;el.classList.add('pixel-text');el.setAttribute('aria-label',text);el.textContent='';
+      var frag=document.createDocumentFragment(),words=text.split(' ');
+      words.forEach(function(word,wi){
+        var ws=document.createElement('span');ws.style.display='inline-block';ws.setAttribute('aria-hidden','true');
+        for(var i=0;i<word.length;i++){var s=document.createElement('span');s.className='pc';s.textContent=word[i];s.style.transitionDelay=(Math.random()*260).toFixed(0)+'ms';ws.appendChild(s);}
+        frag.appendChild(ws);if(wi<words.length-1)frag.appendChild(document.createTextNode(' '));
+      });
+      el.appendChild(frag);
+    });
+    var pio=new IntersectionObserver(function(es){es.forEach(function(e){e.target.classList.toggle('in',e.isIntersecting);});},{threshold:0.15,rootMargin:'0px 0px -6% 0px'});
+    pixelEls.forEach(function(el){pio.observe(el);});
+    addEventListener('beforeprint',function(){pixelEls.forEach(function(el){el.classList.add('in');});});
+  }
+
+  /* section hand-off: leaving section lifts and dims; incoming content holds, then releases */
+  (function(){
+    if(reduceMotion)return;
+    var secs=all('main > section');if(!secs.length)return;
+    var wraps=secs.map(function(s,i){if(i===0)return null;var w=document.createElement('div');w.className='pin';while(s.firstChild)w.appendChild(s.firstChild);s.appendChild(w);return w;});
+    secs.forEach(function(s){s.style.willChange='transform, opacity';s.style.transformOrigin='50% 100%';});
+    var queued=false;
+    function ease(t,k){var ss=t*t*(3-2*t);return t+(ss-t)*k;}
+    function paint(){
+      queued=false;var vh=innerHeight||1,enterWin=vh*0.75;
+      for(var i=0;i<secs.length;i++){
+        var sec=secs[i],wrap=wraps[i],r=sec.getBoundingClientRect();
+        if(r.bottom<-vh*0.5||r.top>vh*1.6){if(sec.style.transform){sec.style.transform='';sec.style.opacity='';}if(wrap&&wrap.style.transform){wrap.style.transform='';wrap.style.opacity='';}continue;}
+        var exitWin=Math.min(vh,r.height),maxS=document.documentElement.scrollHeight-vh,topAtEnd=r.top-(maxS-scrollY),exitP=(exitWin*0.70-r.bottom)/(exitWin*0.48);
+        exitP=exitP<0?0:(exitP>1?1:exitP);if(i===secs.length-1)exitP=0;
+        if(exitP>0){var e=ease(exitP,0.7);sec.style.transform='translate3d(0,'+(-16*e).toFixed(1)+'px,0)';sec.style.opacity=(1-0.35*e).toFixed(3);}
+        else if(sec.style.transform){sec.style.transform='';sec.style.opacity='';}
+        if(wrap){
+          var win=Math.max(1,Math.min(enterWin,vh-topAtEnd));var enterP=(vh-r.top)/win;enterP=enterP<0?0:(enterP>1?1:enterP);
+          if(enterP<1){var ep=ease(enterP,0.45),inv=1-ep;wrap.style.transform='translate3d(0,'+(inv*20).toFixed(1)+'px,0)';wrap.style.opacity=ep.toFixed(3);}
+          else if(wrap.style.transform){wrap.style.transform='';wrap.style.opacity='';}
+        }
+      }
+    }
+    function os(){if(!queued){queued=true;requestAnimationFrame(paint);}}
+    addEventListener('scroll',os,{passive:true});addEventListener('resize',os);paint();
+  })();
+})();
+</script>
+</body>
+</html>
